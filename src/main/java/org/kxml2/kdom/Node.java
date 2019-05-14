@@ -45,26 +45,30 @@ public class Node { //implements XmlIO{
     given index. */
 
     public void addChild(int index, int type, Object child) {
+        if(type != IGNORABLE_WHITESPACE){
+            if (child == null)
+                throw new NullPointerException();
 
-        if (child == null)
-            throw new NullPointerException();
+            if (children == null) {
+                children = new Vector();
+                types = new StringBuffer();
+            }
 
-        if (children == null) {
-            children = new Vector();
-            types = new StringBuffer();
+            if (type == ELEMENT) {
+                if (!(child instanceof Element))
+                    throw new RuntimeException("Element obj expected)");
+
+                ((Element) child).setParent(this);
+            }
+            else if (!(child instanceof String))
+                throw new RuntimeException("String expected");
+
+            children.insertElementAt(child, index);
+            types.insert(index, (char) type);
+        } else {
+            System.out.println("Ignoring Whitespace");
         }
 
-        if (type == ELEMENT) {
-            if (!(child instanceof Element))
-                throw new RuntimeException("Element obj expected)");
-
-            ((Element) child).setParent(this);
-        }
-        else if (!(child instanceof String))
-            throw new RuntimeException("String expected");
-
-        children.insertElementAt(child, index);
-        types.insert(index, (char) type);
     }
 
     /** convenience method for addChild (getChildCount (), child) */
@@ -228,7 +232,9 @@ public class Node { //implements XmlIO{
         do {
             int type = parser.getEventType();
             
-   //         System.out.println(parser.getPositionDescription());
+
+           
+                
             
             switch (type) {
 

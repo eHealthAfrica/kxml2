@@ -1364,7 +1364,18 @@ public class KXmlParser implements XmlPullParser {
 
         token = true;
         nextImpl();
-        return type;
+        isWhitespace = true;
+        txtPos = 0;
+
+       token = true;
+       nextImpl();
+       if (type == KXmlParser.TEXT && isWhitespace) {
+            System.out.println("Whitespace Detected");
+            return nextToken();
+       } else {
+            System.out.println("NExt type ");
+       }
+       return type;
     }
 
     //
