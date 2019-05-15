@@ -45,30 +45,26 @@ public class Node { //implements XmlIO{
     given index. */
 
     public void addChild(int index, int type, Object child) {
-        if(type != IGNORABLE_WHITESPACE){
-            if (child == null)
-                throw new NullPointerException();
 
-            if (children == null) {
-                children = new Vector();
-                types = new StringBuffer();
-            }
+        if (child == null)
+            throw new NullPointerException();
 
-            if (type == ELEMENT) {
-                if (!(child instanceof Element))
-                    throw new RuntimeException("Element obj expected)");
-
-                ((Element) child).setParent(this);
-            }
-            else if (!(child instanceof String))
-                throw new RuntimeException("String expected");
-
-            children.insertElementAt(child, index);
-            types.insert(index, (char) type);
-        } else {
-            System.out.println("Ignoring Whitespace");
+        if (children == null) {
+            children = new Vector();
+            types = new StringBuffer();
         }
 
+        if (type == ELEMENT) {
+            if (!(child instanceof Element))
+                throw new RuntimeException("Element obj expected)");
+            ((Element) child).setParent(this);
+        }
+        else if (!(child instanceof String))
+            throw new RuntimeException("String expected");
+
+        children.insertElementAt(child, index);
+        //-System.out.println("Adding child Chhild..." + child.toString());
+        types.insert(index, (char) type);
     }
 
     /** convenience method for addChild (getChildCount (), child) */
@@ -232,15 +228,10 @@ public class Node { //implements XmlIO{
         do {
             int type = parser.getEventType();
             
-
-           
-                
+   //         System.out.println(parser.getPositionDescription());
             
             switch (type) {
 
-                case XmlPullParser.IGNORABLE_WHITESPACE :
-                    parser.nextToken();
-                    break;
                 case XmlPullParser.START_TAG :
                     {
                         Element child =
@@ -263,14 +254,18 @@ public class Node { //implements XmlIO{
                     break;
 
                 default :
-                    if (parser.getText() != null)
+                    if (parser.getText() != null && !parser.isWhitespace())
                         addChild(
                             type == XmlPullParser.ENTITY_REF ? TEXT : type,
                             parser.getText());
                     else if (
                         type == XmlPullParser.ENTITY_REF
-                            && parser.getName() != null) {
+                            && parser.getName() != null 
+                            && !parser.isWhitespace()) {
                         addChild(ENTITY_REF, parser.getName());
+                    }
+                    else{
+                        //-System.out.println("Ignoring whitespace...");
                     }
                     parser.nextToken();
             }
