@@ -57,13 +57,13 @@ public class Node { //implements XmlIO{
         if (type == ELEMENT) {
             if (!(child instanceof Element))
                 throw new RuntimeException("Element obj expected)");
+
             ((Element) child).setParent(this);
         }
         else if (!(child instanceof String))
             throw new RuntimeException("String expected");
 
         children.insertElementAt(child, index);
-        //-System.out.println("Adding child Chhild..." + child.toString());
         types.insert(index, (char) type);
     }
 
@@ -254,18 +254,14 @@ public class Node { //implements XmlIO{
                     break;
 
                 default :
-                    if (parser.getText() != null && !parser.isWhitespace())
+                    if (parser.getText() != null)
                         addChild(
                             type == XmlPullParser.ENTITY_REF ? TEXT : type,
                             parser.getText());
                     else if (
                         type == XmlPullParser.ENTITY_REF
-                            && parser.getName() != null 
-                            && !parser.isWhitespace()) {
+                            && parser.getName() != null) {
                         addChild(ENTITY_REF, parser.getName());
-                    }
-                    else{
-                        //-System.out.println("Ignoring whitespace...");
                     }
                     parser.nextToken();
             }

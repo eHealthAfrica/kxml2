@@ -23,7 +23,6 @@ package org.kxml2.kdom;
 import java.io.*;
 import java.util.*;
 
-import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.*;
 
 /** 
@@ -216,11 +215,7 @@ public class Element extends Node {
 
 
 		if (parser.isEmptyElementTag()) 
-            parser.nextToken ();
-		else if (parser.getEventType() == KXmlParser.IGNORABLE_WHITESPACE) {
-            System.out.println("Ignoring Whitespace");
-            parser.nextToken ();
-        }
+			parser.nextToken ();
 		else {
 			parser.nextToken ();
 	        super.parse(parser);
