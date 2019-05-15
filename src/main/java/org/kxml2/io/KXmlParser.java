@@ -1353,29 +1353,19 @@ public class KXmlParser implements XmlPullParser {
         type = minType;
         if (type > TEXT)
             type = TEXT;
-
+        if(type == IGNORABLE_WHITESPACE){
+            return next();
+        }
         return type;
     }
 
     public int nextToken() throws XmlPullParserException, IOException {
-
         isWhitespace = true;
         txtPos = 0;
 
         token = true;
         nextImpl();
-        isWhitespace = true;
-        txtPos = 0;
-
-       token = true;
-       nextImpl();
-       if (type == KXmlParser.TEXT && isWhitespace) {
-            System.out.println("Whitespace Detected");
-            return nextToken();
-       } else {
-            System.out.println("NExt type ");
-       }
-       return type;
+        return type;
     }
 
     //
