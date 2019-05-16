@@ -216,6 +216,54 @@ public class Node { //implements XmlIO{
         return t == TEXT || t == IGNORABLE_WHITESPACE || t == CDSECT;
     }
 
+    public int nextNonWhitespace(XmlPullParser parser) throws XmlPullParserException, IOException {
+        int ret = parser.next();
+        if (ret == XmlPullParser.TEXT && parser.isWhitespace()) {
+            System.out.println("Whitespace found");
+            ret = parser.next();
+        }
+        return ret;
+    }
+
+    public Document parseToDoc(XmlPullParser parser)
+         throws IOException, XmlPullParserException {
+
+        final Document document = new Document();
+        Element rootElement =  createElement(parser.getNamespace(), parser.getName());
+        
+        //new TreeElement(parser.getName(), multiplicity);
+        for (int i = 0; i < parser.getAttributeCount(); ++i) {
+            rootElement.setAttribute(parser.getAttributeNamespace(i), parser.getAttributeName(i), parser.getAttributeValue(i));
+        }
+        document.addChild(0, ELEMENT, rootElement);
+        final int depth = parser.getDepth();
+        final Map<String, Integer> multiplicitiesByName = new HashMap();
+        while (parser.getDepth() >= depth) {
+            int type = nextNonWhitespace(parser);
+            switch (type) {
+                case XmlPullParser.START_TAG:
+                    String name = parser.getName();
+                    final Integer multiplicity = multiplicitiesByName.get(name);
+                    int newMultiplicity = (multiplicity != null) ? multiplicity + 1 : 0;
+                    multiplicitiesByName.put(name, newMultiplicity);
+                    Element childElement = createElement(null, name);
+                    //new TreeElementParser(parser, newMultiplicity, instanceId).parse();
+                    rootElement.addChild(newMultiplicity, type, childElement);
+                    break;
+                case XmlPullParser.END_TAG:
+                    return document;
+                case XmlPullParser.TEXT:
+                    addChild(type == XmlPullParser.ENTITY_REF ? TEXT : type, parser.getText());
+                    break;
+                default:
+                    throw new XmlPullParserException(
+                        "Exception while trying to parse an XML Tree, got something other than tags and text");
+            }
+        }
+        return document;
+
+    }
+
     /** Recursively builds the child elements from the given parser
     until an end tag or end document is found. 
         The end tag is not consumed. */
