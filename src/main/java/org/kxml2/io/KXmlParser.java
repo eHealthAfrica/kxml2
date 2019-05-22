@@ -1353,10 +1353,12 @@ public class KXmlParser implements XmlPullParser {
         type = minType;
         if (type > TEXT)
             type = TEXT;
+
         return type;
     }
 
     public int nextToken() throws XmlPullParserException, IOException {
+
         isWhitespace = true;
         txtPos = 0;
 
