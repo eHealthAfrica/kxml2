@@ -1353,9 +1353,6 @@ public class KXmlParser implements XmlPullParser {
         type = minType;
         if (type > TEXT)
             type = TEXT;
-        if(type == IGNORABLE_WHITESPACE){
-            return next();
-        }
         return type;
     }
 
