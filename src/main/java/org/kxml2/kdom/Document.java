@@ -34,6 +34,14 @@ public class Document extends Node {
     String encoding;
     Boolean standalone;
 
+    public Document() {
+        this(false);
+    }
+
+    public Document(Boolean ignoreWhiteSpace) {
+        super(ignoreWhiteSpace);
+    }
+
     /** returns "#document" */
 
     public String getEncoding () {

@@ -23,6 +23,7 @@ package org.kxml2.kdom;
 import java.io.*;
 import java.util.*;
 
+import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.*;
 
 /** 
@@ -39,6 +40,11 @@ public class Element extends Node {
     protected Vector prefixes;
 
     public Element() {
+        super(false);
+    }
+
+    public Element(boolean ignoreWhitespaceParsing) {
+        super(ignoreWhitespaceParsing);
     }
 
     /** 
@@ -67,10 +73,27 @@ public class Element extends Node {
     public Element createElement(
         String namespace,
         String name) { 
-
-        return (this.parent == null)
+        if(ignoreWhitespaceParsing){
+            return (this.parent == null)
+            ? super.createElement(namespace, name, ignoreWhitespaceParsing)
+            : this.parent.createElement(namespace, name, ignoreWhitespaceParsing                                                                                        );
+        }else {
+            return (this.parent == null)
             ? super.createElement(namespace, name)
             : this.parent.createElement(namespace, name);
+        }
+        
+    }
+
+    /** 
+     * Forwards creation request to parent if any, otherwise
+     * calls super.createElement. */
+
+    public Element createElement(
+        String namespace,
+        String name,
+        boolean ignoreWhiteSpace) { 
+        return createElement(namespace, name, ignoreWhitespaceParsing);
     }
 
     /** 
@@ -193,7 +216,7 @@ public class Element extends Node {
      * parse, an element can take complete control over parsing its 
      * subtree. */
 
-    public void parse(XmlPullParser parser)
+    public void parse(KXmlParser parser)
         throws IOException, XmlPullParserException {
 
         for (int i = parser.getNamespaceCount (parser.getDepth () - 1);
@@ -213,14 +236,18 @@ public class Element extends Node {
 
         init();
 
-        nextNonWhitespace(parser);
-        super.parse(parser);
-
 		if (parser.isEmptyElementTag()) 
 			parser.nextToken ();
 		else {
-			parser.nextToken ();
-	        super.parse(parser);
+            if(ignoreWhitespaceParsing){
+                parser.nextNonWhitespace();
+            }else {
+                parser.nextToken();
+            }
+			
+            super.parse(parser);
+            
+
 
         	if (getChildCount() == 0)
             	addChild(IGNORABLE_WHITESPACE, "");
@@ -231,8 +258,11 @@ public class Element extends Node {
             getNamespace(),
             getName());
           
-        nextNonWhitespace(parser);
-        //parser.nextToken ();
+            if(ignoreWhitespaceParsing){
+                parser.nextNonWhitespace();
+            }else {
+                parser.nextToken();
+            }
     }
 
 

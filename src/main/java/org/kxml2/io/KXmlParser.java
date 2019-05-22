@@ -1334,6 +1334,14 @@ public class KXmlParser implements XmlPullParser {
         return type;
     }
 
+    public int nextNonWhitespace() throws XmlPullParserException, IOException {
+        int ret = next();
+        if (ret == XmlPullParser.TEXT && isWhitespace()) {
+            ret = next();
+        }
+        return ret;
+    }
+
     public int next() throws XmlPullParserException, IOException {
 
         txtPos = 0;

@@ -22,6 +22,8 @@ package org.kxml2.kdom;
 
 import java.util.*;
 import java.io.*;
+
+import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.*;
 /** A common base class for Document and Element, also used for
     storing XML fragments. */
@@ -40,6 +42,18 @@ public class Node { //implements XmlIO{
 
     protected Vector children;
     protected StringBuffer types;
+
+    protected boolean ignorableWhitespace;
+    protected boolean ignoreWhitespaceParsing;
+
+    public Node(){
+        this(false);
+    }
+
+    public Node(boolean ignoreWhitespaceParsing){
+        this.ignoreWhitespaceParsing = ignoreWhitespaceParsing;
+    }
+    
 
     /** inserts the given child object of the given type at the
     given index. */
@@ -84,6 +98,16 @@ public class Node { //implements XmlIO{
     public Element createElement(String namespace, String name) {
 
         Element e = new Element();
+        e.namespace = namespace == null ? "" : namespace;
+        e.name = name;
+        return e;
+    }
+
+
+    public Element createElement(String namespace, String name,
+    boolean ignoreWhiteSpace) {
+
+        Element e = new Element(ignoreWhiteSpace);
         e.namespace = namespace == null ? "" : namespace;
         e.name = name;
         return e;
@@ -220,7 +244,7 @@ public class Node { //implements XmlIO{
     until an end tag or end document is found. 
         The end tag is not consumed. */
 
-    public void parse(XmlPullParser parser)
+    public void parse(KXmlParser parser)
         throws IOException, XmlPullParserException {
 
         boolean leave = false;
@@ -237,7 +261,7 @@ public class Node { //implements XmlIO{
                         Element child =
                             createElement(
                                 parser.getNamespace(),
-                                parser.getName());
+                                parser.getName(), ignorableWhitespace);
                         //    child.setAttributes (event.getAttributes ());
                         addChild(ELEMENT, child);
 
@@ -263,7 +287,11 @@ public class Node { //implements XmlIO{
                             && parser.getName() != null) {
                         addChild(ENTITY_REF, parser.getName());
                     }
-                    nextNonWhitespace(parser);
+                    if(ignoreWhitespaceParsing){
+                        nextNonWhitespace(parser);
+                    }else {
+                        parser.nextToken();
+                    }
             }
         }
         while (!leave);
@@ -364,11 +392,5 @@ public class Node { //implements XmlIO{
         }
     }
 
-    int nextNonWhitespace(XmlPullParser parser) throws XmlPullParserException, IOException {
-        int ret = parser.next();
-        if (ret == XmlPullParser.TEXT && parser.isWhitespace()) {
-            ret = parser.next();
-        }
-        return ret;
-    }
+
 }
